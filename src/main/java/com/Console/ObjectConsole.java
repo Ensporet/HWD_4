@@ -7,27 +7,38 @@ import java.util.Scanner;
 
 public abstract class ObjectConsole<T> implements IAction {
 
+    public static final int ITERATION_CLOSE = 0;
+    public static final int ITERATION_RUN = 1;
+    public static final int ITERATION_EXIT = -1;
+    public static int ConsoleIteration = 0;
+    public static boolean ConsoleUpdate = false;
     private final HashMap<String, T> hashMap = new HashMap();
+    private final List<IAction> DEFAULT_ACTIONS = new ArrayList<>();
+    private final List<IAction> ACTIONS = new ArrayList<>();
+    private final String NAME;
     private String startMessage;
     private String endMessage;
     private String notHaveCommandMessage;
-    public static int ConsoleIteration = 0;
-    public static boolean ConsoleUpdate = false;
-    private final List<IAction> DEFAULT_ACTIONS = new ArrayList<>();
-    private final List<IAction> ACTIONS = new ArrayList<>();
     private String info;
     private Scanner scanner;
 
 
-    public ObjectConsole(String startMessage, String endMessage, String notHaveCommandMessage, Scanner scanner) {
+    public ObjectConsole(
+            String startMessage,
+            String endMessage,
+            String notHaveCommandMessage,
+            String NAME,
+            Scanner scanner
+    ) {
         this.startMessage = startMessage;
         this.endMessage = endMessage;
         this.notHaveCommandMessage = notHaveCommandMessage;
         this.scanner = scanner;
+        this.NAME = NAME;
     }
 
     public ObjectConsole(Scanner scanner) {
-        this.scanner = scanner;
+        this(null, null, null, null, scanner);
     }
 
     public void action() {
@@ -35,8 +46,10 @@ public abstract class ObjectConsole<T> implements IAction {
         printlnString(getStartMessage());
 
         ObjectConsole.ConsoleUpdate = true;
-        ObjectConsole.ConsoleIteration++;
-        while (ObjectConsole.ConsoleIteration > 0) {
+        if (ObjectConsole.ConsoleIteration != ObjectConsole.ITERATION_EXIT) {
+            ObjectConsole.ConsoleIteration = ObjectConsole.ITERATION_RUN;
+        }
+        while (ObjectConsole.ConsoleIteration > ObjectConsole.ITERATION_CLOSE) {
             if (ObjectConsole.ConsoleUpdate) {
                 update();
             }
@@ -54,28 +67,38 @@ public abstract class ObjectConsole<T> implements IAction {
 
 
         }
-        ObjectConsole.ConsoleIteration++;
+        if (ObjectConsole.ConsoleIteration != ObjectConsole.ITERATION_EXIT) {
+            ObjectConsole.ConsoleIteration = ObjectConsole.ITERATION_RUN;
+        }
         printlnString(getEndMessage());
 
+    }
+
+    //--------------------------------
+
+    @Override
+    public String getName() {
+        return this.NAME;
     }
 
 
     //------------------------------------------
 
-    private void update() {
+    protected void update() {
         ObjectConsole.ConsoleUpdate = false;
         getHashMap().clear();
         int iteration = 0;
-        StringBuilder stringBuilder = new StringBuilder((getName() == null) ? "Console\n" : getName() + " : \n");
+        StringBuilder stringBuilder =
+                new StringBuilder((getName() == null) ? this.getClass().getTypeName() + "\n" : getName() + " : \n");
 
 
         for (IAction action : getACTIONS()) {
             String key = String.valueOf(iteration++);
             getHashMap().put(key, action);
-            stringBuilder.append("\n" + createRowInfo(key, action));
+            stringBuilder.append("\n").append(createRowInfo(key, action));
         }
 
-        stringBuilder.append("\n" + getSeparator());
+        stringBuilder.append("\n").append(getSeparator());
 
         for (IAction action : getDEFAULT_ACTIONS()) {
             String key = String.valueOf(iteration++);

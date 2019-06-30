@@ -12,6 +12,6 @@ public class ActionReturn implements IAction {
     @Override
     public void action() {
         System.out.println("<<<<Return--------------/");
-        ObjectConsole.ConsoleIteration--;
+        ObjectConsole.ConsoleIteration = ObjectConsole.ITERATION_CLOSE;
     }
 }

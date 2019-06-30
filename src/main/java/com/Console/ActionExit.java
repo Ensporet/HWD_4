@@ -1,7 +1,5 @@
 package com.Console;
 
-import com.Main;
-
 public class ActionExit implements IAction {
 
 
@@ -13,7 +11,7 @@ public class ActionExit implements IAction {
 
     @Override
     public void action() {
-        Main.exit();
+        ObjectConsole.ConsoleIteration = ObjectConsole.ITERATION_EXIT;
 
     }
 }
